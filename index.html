@@ -38,57 +38,36 @@
   }
 
   /* Layout */
-  .app { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+  --nav-h: 66px;
+  html, body { height: 100%; }
 
-  /* Sidebar */
-  .sidebar {
-    background: var(--bg2);
-    border-right: 1px solid var(--border);
-    padding: 28px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    overflow-y: auto;
+  /* Scroll wrapper */
+  .app { display: block; }
+  .scroll-wrap { height: 100vh; overflow-y: auto; padding-bottom: var(--nav-h); -webkit-overflow-scrolling: touch; }
+
+  /* Bottom nav */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    height: var(--nav-h); background: var(--bg2);
+    border-top: 1px solid var(--border);
+    display: flex; z-index: 100;
+    padding-bottom: env(safe-area-inset-bottom);
   }
-  .sidebar-logo {
-    font-family: 'DM Serif Display', serif;
-    font-size: 22px;
-    color: var(--accent);
-    letter-spacing: -0.5px;
-    margin-bottom: 24px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--border);
-  }
-  .sidebar-logo span { color: var(--text2); font-size: 13px; font-family: 'Outfit', sans-serif; display: block; font-weight: 300; margin-top: 2px; }
-  .nav-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text3); font-weight: 500; margin: 16px 0 6px 8px; }
   .nav-item {
-    display: flex; align-items: center; gap: 10px;
-    padding: 9px 12px; border-radius: var(--radius);
-    cursor: pointer; color: var(--text2);
-    transition: all 0.15s; font-weight: 400;
-    border: 1px solid transparent;
-    font-size: 14px;
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 4px;
+    cursor: pointer; color: var(--text3);
+    transition: color 0.15s; background: none;
+    border: none; font-family: 'Outfit', sans-serif;
+    padding: 0; -webkit-tap-highlight-color: transparent;
   }
-  .nav-item:hover { background: var(--bg3); color: var(--text); }
-  .nav-item.active { background: var(--accent-dim); color: var(--accent); border-color: var(--border2); }
-  .nav-icon { width: 18px; text-align: center; font-size: 16px; }
-
-  /* Habit list in sidebar */
-  .habit-sidebar-item {
-    display: flex; align-items: center; gap: 8px;
-    padding: 7px 12px; border-radius: var(--radius);
-    cursor: pointer; transition: all 0.15s;
-    font-size: 13px; color: var(--text2);
-  }
-  .habit-sidebar-item:hover { background: var(--bg3); }
-  .habit-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-  .habit-sidebar-item span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .nav-item:hover { color: var(--text2); }
+  .nav-item.active { color: var(--accent); }
+  .nav-icon { font-size: 20px; line-height: 1; }
+  .nav-item-label { font-size: 10px; font-weight: 500; letter-spacing: 0.3px; }
 
   /* Main content */
-  .main { padding: 40px 48px; overflow-y: auto; }
+  .main { padding: 32px 24px; max-width: 800px; margin: 0 auto; }
   .page { display: none; }
   .page.active { display: block; }
 
@@ -247,13 +226,14 @@
 
   /* Toast */
   .toast {
-    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(60px);
+    position: fixed; bottom: calc(var(--nav-h) + 12px); left: 50%;
+    transform: translateX(-50%) translateY(20px);
     background: var(--bg3); border: 1px solid var(--border2);
     border-radius: 20px; padding: 10px 20px; font-size: 13px; color: var(--text);
-    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
-    z-index: 100; pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    z-index: 300; pointer-events: none; opacity: 0; white-space: nowrap;
   }
-  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
   /* Past day modal */
   .modal-overlay {
@@ -328,43 +308,18 @@
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 3px; }
 
-  @media (max-width: 768px) {
-    .app { grid-template-columns: 1fr; }
-    .sidebar { position: fixed; left: -260px; z-index: 50; transition: left 0.3s; height: 100%; }
-    .sidebar.open { left: 0; }
-    .main { padding: 24px 20px; }
+  /* Responsive */
+  @media (max-width: 600px) {
+    .main { padding: 20px 16px; }
     .stats-grid { grid-template-columns: 1fr 1fr; }
+    .today-grid { grid-template-columns: 1fr 1fr; }
   }
 </style>
 </head>
 <body>
 
 <div class="app">
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar-logo">
-      ✦ rituals
-      <span>habit tracker personnel</span>
-    </div>
-
-    <div class="nav-label">Navigation</div>
-    <div class="nav-item active" onclick="showPage('today')">
-      <span class="nav-icon">○</span> Aujourd'hui
-    </div>
-    <div class="nav-item" onclick="showPage('calendar')">
-      <span class="nav-icon">▦</span> Calendrier
-    </div>
-    <div class="nav-item" onclick="showPage('stats')">
-      <span class="nav-icon">◈</span> Statistiques
-    </div>
-    <div class="nav-item" onclick="showPage('manage')">
-      <span class="nav-icon">⊕</span> Gérer les habitudes
-    </div>
-
-    <div class="nav-label" style="margin-top: auto;">Mes habitudes</div>
-    <div id="sidebar-habits"></div>
-  </aside>
-
+  <div class="scroll-wrap" id="scroll-wrap">
   <!-- Main -->
   <main class="main">
 
@@ -470,7 +425,28 @@
     </div>
 
   </main>
+  </div><!-- end scroll-wrap -->
 </div>
+
+<!-- Bottom nav -->
+<nav class="bottom-nav">
+  <button class="nav-item active" onclick="showPage('today', this)">
+    <span class="nav-icon">○</span>
+    <span class="nav-item-label">Aujourd'hui</span>
+  </button>
+  <button class="nav-item" onclick="showPage('calendar', this)">
+    <span class="nav-icon">▦</span>
+    <span class="nav-item-label">Calendrier</span>
+  </button>
+  <button class="nav-item" onclick="showPage('stats', this)">
+    <span class="nav-icon">◈</span>
+    <span class="nav-item-label">Stats</span>
+  </button>
+  <button class="nav-item" onclick="showPage('manage', this)">
+    <span class="nav-icon">⊕</span>
+    <span class="nav-item-label">Habitudes</span>
+  </button>
+</nav>
 
 <!-- Toast -->
 <div class="toast" id="toast"></div>
@@ -532,13 +508,12 @@ function toggleLog(habitId, key) {
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
 
-function showPage(name) {
+function showPage(name, btn) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
-  const items = document.querySelectorAll('.nav-item');
-  const idx = ['today','calendar','stats','manage'].indexOf(name);
-  if (idx >= 0) items[idx].classList.add('active');
+  if (btn) btn.classList.add('active');
+  document.getElementById('scroll-wrap').scrollTop = 0;
 
   if (name === 'today') renderToday();
   if (name === 'calendar') renderCalendar();
@@ -582,7 +557,6 @@ function renderToday() {
     div.onclick = () => {
       toggleLog(h.id, key);
       renderToday();
-      renderSidebarHabits();
       showToast(done ? `${h.emoji} retiré` : `${h.emoji} ${h.name} ✓`);
     };
     grid.appendChild(div);
@@ -807,7 +781,6 @@ function addHabit() {
   save();
   document.getElementById('habit-name').value = '';
   renderManage();
-  renderSidebarHabits();
   showToast(`${selectedEmoji} ${name} ajoutée !`);
 }
 
@@ -817,26 +790,10 @@ function deleteHabit(id) {
   Object.keys(logs).forEach(k => { logs[k] = logs[k].filter(lid => lid !== id); });
   save();
   renderManage();
-  renderSidebarHabits();
   showToast('Habitude supprimée');
 }
 
-// ─── Sidebar habits ───────────────────────────────────────────────────────────
-
-function renderSidebarHabits() {
-  const el = document.getElementById('sidebar-habits');
-  el.innerHTML = '';
-  habits.forEach(h => {
-    const key = todayKey();
-    const done = isLogged(h.id, key);
-    const div = document.createElement('div');
-    div.className = 'habit-sidebar-item';
-    div.innerHTML = `<div class="habit-dot" style="background:${done ? h.color : 'var(--bg4)'}"></div><span>${h.emoji} ${h.name}</span>`;
-    el.appendChild(div);
-  });
-}
-
-// ─── Toast ────────────────────────────────────────────────────────────────────
+// ─── Init ─────────────────────────────────────────────────────────────────────
 
 function showToast(msg) {
   const t = document.getElementById('toast');
@@ -901,7 +858,6 @@ function renderModalHabits() {
       // Refresh views if we're on today and editing today
       if (modalCurrentKey === todayKey()) {
         renderToday();
-        renderSidebarHabits();
       }
       renderCalendar();
     };
@@ -938,7 +894,6 @@ function seedDefaults() {
 // ─── Init ─────────────────────────────────────────────────────────────────────
 
 seedDefaults();
-renderSidebarHabits();
 renderToday();
 
 // Set max date for past-day input to today
